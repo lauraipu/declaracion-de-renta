@@ -95,10 +95,8 @@
 
 /*
  * Filtros rápidos.
- * La línea que se quedaba bajo "TODOS" era el indicador interno de ion-segment-button
- * (::part(indicator)), no un border-bottom propio: al tocar otro filtro, la animación del
- * indicador y el desplazamiento horizontal del segmento coincidían y el indicador anterior
- * no se ocultaba. Aquí se fuerza que SOLO el botón activo pinte su línea.
+ * Se desactiva el indicador interno animado de Ionic y se pinta una línea propia en el
+ * botón seleccionado. Así solo existe una línea y nunca queda visible bajo el filtro anterior.
  */
 .contenedor-filtros {
   position: relative;
@@ -118,19 +116,29 @@
 
 .filtros {
   padding: 0 32px 0 12px;
-  border-bottom: 1px solid var(--app-gris-lila);
 
   ion-segment-button {
+    position: relative;
     min-width: auto;
     --padding-start: 14px;
     --padding-end: 14px;
     --indicator-transition: none;
+    --indicator-height: 0;
+    --indicator-color: transparent;
 
+    &::part(indicator),
     &::part(indicator-background) {
-      background: transparent;
+      display: none;
     }
 
-    &.segment-button-checked::part(indicator-background) {
+    &.segment-button-checked::after {
+      content: '';
+      position: absolute;
+      right: 14px;
+      bottom: 0;
+      left: 14px;
+      height: 3px;
+      border-radius: 3px 3px 0 0;
       background: var(--ion-color-primary);
     }
   }
