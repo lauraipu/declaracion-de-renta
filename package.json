@@ -61,5 +61,5 @@
     "vitest": "^5.1.0"
   },
   "prettier": "@ionic/prettier-config",
-  "description": "An Ionic project"
+  "description": "Aplicación móvil con Ionic y Angular para registrar gastos, adjuntar recibos y organizar soportes deducibles para renta."
 }
