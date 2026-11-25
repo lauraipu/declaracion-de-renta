@@ -1,15 +1,203 @@
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar>
-    <ion-title> Tab 1 </ion-title>
+    <ion-title>{{ edicion() ? 'Editar Gasto' : 'Nuevo Gasto' }}</ion-title>
+    @if (hayDatos) {
+      <ion-buttons slot="end">
+        <ion-button (click)="descartar()" [attr.aria-label]="edicion() ? 'Cancelar edición' : 'Descartar gasto'">
+          <ion-icon slot="icon-only" name="close-outline" aria-hidden="true"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    }
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 1</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content>
+  <!-- Container 1: Área de captura -->
+  <ion-card class="zona-captura" [class.con-recibo]="foto()">
+    @if (procesando()) {
+      <div class="cargando" role="status">
+        <ion-spinner name="crescent" aria-hidden="true"></ion-spinner>
+        <span>Procesando recibo…</span>
+      </div>
+    } @else if (!foto()) {
+      <div class="vacia">
+        <ion-icon name="receipt-outline" class="icono-grande" aria-hidden="true"></ion-icon>
+        <p>Toma una foto del recibo o súbelo{{ ocr.disponible ? ' y leeremos el monto y la fecha por ti' : '' }}.</p>
+        <div class="acciones">
+          <ion-button fill="outline" (click)="tomarFoto()">
+            <ion-icon slot="start" name="camera-outline" aria-hidden="true"></ion-icon>
+            Tomar foto
+          </ion-button>
+          <ion-button fill="outline" (click)="subirArchivo()">
+            <ion-icon slot="start" name="cloud-upload-outline" aria-hidden="true"></ion-icon>
+            Subir archivo
+          </ion-button>
+        </div>
+        <ion-note class="formatos">JPG, PNG, WEBP o PDF · máximo {{ tamanoMaximoMb }} MB</ion-note>
+      </div>
+    } @else {
+      <div class="previa">
+        @if (fotoUrl()) {
+          <img [src]="fotoUrl()" alt="Vista previa del recibo" (click)="verGrande()" />
+        } @else {
+          <div class="pdf">
+            <ion-icon name="document-outline" aria-hidden="true"></ion-icon>
+            <span>PDF adjunto</span>
+          </div>
+        }
 
-  <app-explore-container name="Tab 1 page"></app-explore-container>
+        @if (leyendo()) {
+          <div class="leyendo" role="status">
+            <ion-spinner name="crescent" aria-hidden="true"></ion-spinner>
+            <span>Leyendo recibo…</span>
+          </div>
+        }
+
+        @if (fotoUrl()) {
+          <ion-fab vertical="top" horizontal="end">
+            <ion-fab-button size="small" color="light" (click)="verGrande()" aria-label="Ver recibo en pantalla completa">
+              <ion-icon name="expand-outline" aria-hidden="true"></ion-icon>
+            </ion-fab-button>
+          </ion-fab>
+        }
+        <ion-fab vertical="bottom" horizontal="end">
+          <ion-fab-button size="small" (click)="reemplazar()" aria-label="Reemplazar o quitar el recibo">
+            <ion-icon name="swap-horizontal-outline" aria-hidden="true"></ion-icon>
+          </ion-fab-button>
+        </ion-fab>
+      </div>
+    }
+  </ion-card>
+  <input
+    #selectorArchivo
+    type="file"
+    accept="image/jpeg,image/png,image/webp,application/pdf"
+    hidden
+    (change)="alSeleccionarArchivo($event)"
+  />
+
+  <!-- Container 2: Formulario -->
+  <ion-list inset="true" class="formulario">
+    <ion-item>
+      <app-campo-dinero
+        label="Monto *"
+        [(valor)]="monto"
+        errorText="Ingresa un monto mayor a $0"
+        [mostrarError]="intentoGuardar && !montoValido"
+      ></app-campo-dinero>
+    </ion-item>
+
+    <ion-item>
+      <ion-input
+        label="Comercio *"
+        labelPlacement="stacked"
+        autocapitalize="words"
+        maxlength="80"
+        placeholder="Ej: Clínica Sanitas"
+        [(ngModel)]="comercio"
+        errorText="Escribe el nombre del comercio"
+        [class.ion-touched]="intentoGuardar"
+        [class.ion-invalid]="intentoGuardar && !comercioValido"
+      ></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label id="etiqueta-fecha">Fecha</ion-label>
+      <ion-datetime-button slot="end" datetime="fecha-gasto" aria-labelledby="etiqueta-fecha"></ion-datetime-button>
+    </ion-item>
+
+    <ion-item>
+      <ion-select
+        label="Categoría"
+        labelPlacement="stacked"
+        interface="action-sheet"
+        cancelText="Cancelar"
+        [(ngModel)]="categoria"
+      >
+        @for (c of categorias; track c.valor) {
+          <ion-select-option [value]="c.valor">{{ c.etiqueta }}</ion-select-option>
+        }
+      </ion-select>
+    </ion-item>
+
+    <ion-item>
+      <ion-textarea
+        label="Nota / Concepto (opcional)"
+        labelPlacement="stacked"
+        [autoGrow]="true"
+        maxlength="200"
+        placeholder="Ej: Examen de laboratorio"
+        [(ngModel)]="descripcion"
+      ></ion-textarea>
+    </ion-item>
+  </ion-list>
+
+  <!-- Modal compacto del selector de fecha -->
+  <ion-modal [keepContentsMounted]="true">
+    <ng-template>
+      <ion-datetime
+        id="fecha-gasto"
+        presentation="date"
+        locale="es-CO"
+        [firstDayOfWeek]="1"
+        [max]="maxFecha()"
+        [showDefaultButtons]="true"
+        doneText="Listo"
+        cancelText="Cancelar"
+        [(ngModel)]="fecha"
+        (ionChange)="alCambiarFecha()"
+      ></ion-datetime>
+    </ng-template>
+  </ion-modal>
+
+  <!-- Container 3: Tarjeta tributaria -->
+  <ion-list inset="true" class="tarjeta-tributaria">
+    <ion-item lines="none">
+      <ion-toggle [(ngModel)]="esDeducible" justify="space-between">
+        <span class="ion-text-wrap">¿Aplica como soporte / deducible para renta?</span>
+      </ion-toggle>
+    </ion-item>
+    @if (esDeducible) {
+      <ion-item lines="none">
+        <ion-select
+          label="Tipo de soporte *"
+          labelPlacement="stacked"
+          interface="action-sheet"
+          cancelText="Cancelar"
+          placeholder="Elige el tipo"
+          [(ngModel)]="tipoDeducible"
+          errorText="Elige el tipo de soporte"
+          [class.ion-touched]="intentoGuardar"
+          [class.ion-invalid]="intentoGuardar && !tipoValido"
+        >
+          @for (t of tipos; track t.valor) {
+            <ion-select-option [value]="t.valor">{{ t.etiqueta }}</ion-select-option>
+          }
+        </ion-select>
+      </ion-item>
+      @if (!foto()) {
+        <p class="aviso-soporte">
+          <ion-icon name="warning-outline" aria-hidden="true"></ion-icon>
+          <span>Falta el soporte: adjunta la foto o el PDF del recibo arriba.</span>
+        </p>
+      }
+    }
+  </ion-list>
 </ion-content>
+
+<!-- Footer de acción (fuera de ion-toolbar para que el botón sea sólido) -->
+<ion-footer class="ion-no-border">
+  <div class="pie-accion">
+    <ion-button
+      color="primary"
+      expand="block"
+      (click)="guardar()"
+      [disabled]="guardando() || leyendo() || procesando()"
+    >
+      @if (guardando()) {
+        <ion-spinner slot="start" name="crescent" aria-hidden="true"></ion-spinner>
+      }
+      {{ edicion() ? 'Actualizar Gasto' : 'Guardar Gasto' }}
+    </ion-button>
+  </div>
+</ion-footer>

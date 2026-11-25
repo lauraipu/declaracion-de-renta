@@ -1,15 +1,145 @@
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar>
-    <ion-title> Tab 3 </ion-title>
+    <ion-title>Renta Anual</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="abrirGuia()" aria-label="Guía rápida: qué soportes sirven para la renta">
+        <ion-icon slot="icon-only" name="help-circle-outline" aria-hidden="true"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar class="selector-anio">
+    <ion-select
+      label="Año fiscal"
+      interface="popover"
+      [value]="anio()"
+      (ionChange)="cambiarAnio($event.detail.value)"
+      class="ion-padding-horizontal"
+    >
+      @for (a of anios(); track a) {
+        <ion-select-option [value]="a">{{ a }}</ion-select-option>
+      }
+    </ion-select>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 3</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content>
+  @if (!deducibles().length) {
+    <!-- Un único estado vacío (sin mensajes repetidos) -->
+    <div class="estado-vacio vacio-anual">
+      <ion-icon name="document-text-outline" aria-hidden="true"></ion-icon>
+      <h2>Sin gastos deducibles en {{ anio() }}</h2>
+      <p>Cuando registres un gasto y actives "¿Aplica como soporte / deducible para renta?", aparecerá aquí con su soporte.</p>
+      <ion-button (click)="irARegistrar()">
+        <ion-icon slot="start" name="add-circle-outline" aria-hidden="true"></ion-icon>
+        Registrar gasto deducible
+      </ion-button>
+    </div>
+  } @else {
+    <!-- Container 1: Totales por rubro tributario -->
+    <ion-card class="totales">
+      <ion-card-header>
+        <ion-card-subtitle>Total deducible {{ anio() }}</ion-card-subtitle>
+        <ion-card-title>{{ total() | moneda: config().moneda }}</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        @for (r of rubros(); track r.etiqueta) {
+          <div class="rubro">
+            <div class="rubro-fila">
+              <span class="ion-text-wrap">{{ r.etiqueta }} <small>({{ r.cantidad }})</small></span>
+              <strong>{{ r.total | moneda: config().moneda }}</strong>
+            </div>
+            @if (r.tope) {
+              <ion-progress-bar
+                [value]="r.progreso"
+                [color]="r.progreso >= 1 ? 'rosa' : 'primary'"
+                [attr.aria-label]="r.etiqueta + ': ' + (r.progreso * 100).toFixed(0) + '% del tope anual referencial'"
+              ></ion-progress-bar>
+              <small class="tope">
+                {{ (r.progreso * 100).toFixed(0) }}% del tope anual de {{ r.tope | moneda: config().moneda }}
+                @if (r.progreso >= 1) {
+                  · tope alcanzado
+                }
+              </small>
+            }
+          </div>
+        }
+        @if (!config().topesDeducibles || !rubros().some(tieneTope)) {
+          <p class="sin-topes">Puedes definir topes anuales por rubro en Mes Actual › ⚙ Presupuesto.</p>
+        }
+      </ion-card-content>
+    </ion-card>
 
-  <app-explore-container name="Tab 3 page"></app-explore-container>
+    <!-- Container 2: Auditoría de soportes -->
+    @if (sinSoporte().length) {
+      <ion-list inset="true" class="auditoria">
+        <ion-item button [detail]="false" (click)="alternarSinSoporte()" lines="none">
+          <ion-icon slot="start" name="warning-outline" aria-hidden="true"></ion-icon>
+          <ion-label class="ion-text-wrap">
+            <h3>Soportes fotográficos faltantes</h3>
+            <p>
+              Tienes {{ sinSoporte().length }}
+              {{ sinSoporte().length === 1 ? 'gasto deducible' : 'gastos deducibles' }} sin soporte fotográfico.
+              {{ soloSinSoporte() ? 'Toca para ver todos.' : 'Toca para verlos y adjuntar la foto.' }}
+            </p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+    } @else {
+      <p class="todo-ok">
+        <ion-icon name="checkmark-circle-outline" aria-hidden="true"></ion-icon>
+        Todos tus gastos deducibles tienen soporte.
+      </p>
+    }
+
+    <!-- Container 3: Historial deducible -->
+    <ion-list>
+      <ion-list-header>
+        <ion-label>{{ soloSinSoporte() ? 'Sin soporte' : 'Historial deducible' }}</ion-label>
+      </ion-list-header>
+      @for (g of historial(); track g.id) {
+        <ion-item>
+          <button
+            slot="start"
+            class="boton-miniatura"
+            (click)="g.fotoNombreArchivo ? verRecibo(g) : adjuntar(g)"
+            [attr.aria-label]="g.fotoNombreArchivo ? 'Ver recibo de ' + g.comercio : 'Adjuntar soporte de ' + g.comercio"
+          >
+            <app-miniatura-recibo [gasto]="g"></app-miniatura-recibo>
+          </button>
+          <ion-label class="ion-text-wrap">
+            <h2>{{ g.titulo || g.comercio }}</h2>
+            <p>{{ fechaCorta(g.fecha) }} · {{ etiquetaDeducible(g.tipoDeducible) }}</p>
+            @if (!g.tieneSoporte) {
+              <ion-button size="small" fill="outline" (click)="adjuntar(g)">
+                <ion-icon slot="start" name="attach-outline" aria-hidden="true"></ion-icon>
+                Adjuntar foto
+              </ion-button>
+            }
+          </ion-label>
+          <ion-note slot="end" class="monto">{{ g.monto | moneda: config().moneda }}</ion-note>
+        </ion-item>
+      }
+    </ion-list>
+  }
+
+  <input
+    #selectorArchivo
+    type="file"
+    accept="image/jpeg,image/png,image/webp,application/pdf"
+    hidden
+    (change)="alSeleccionarArchivo($event)"
+  />
 </ion-content>
+
+<ion-footer class="ion-no-border">
+  <div class="pie-accion">
+    <ion-button color="primary" expand="block" (click)="exportar()" [disabled]="exportando() || !deducibles().length">
+      @if (exportando()) {
+        <ion-spinner slot="start" name="crescent" aria-hidden="true"></ion-spinner>
+      } @else {
+        <ion-icon slot="start" name="share-social-outline" aria-hidden="true"></ion-icon>
+      }
+      Generar Paquete para Contador
+    </ion-button>
+  </div>
+</ion-footer>

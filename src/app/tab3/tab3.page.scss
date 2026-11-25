@@ -1,0 +1,136 @@
+.selector-anio {
+  --background: var(--ion-color-primary-shade);
+  --color: #ffffff;
+
+  ion-select {
+    --placeholder-color: #ffffff;
+    color: #ffffff;
+    min-height: 44px;
+  }
+}
+
+.totales {
+  margin: 16px;
+  border-radius: 20px;
+  background: var(--app-azul-lavanda);
+  color: var(--app-indigo);
+
+  ion-card-subtitle {
+    color: var(--app-indigo);
+  }
+
+  ion-card-title {
+    color: var(--app-indigo);
+    font-size: 1.8rem;
+    font-weight: 700;
+    word-break: break-word;
+  }
+
+  p {
+    color: var(--app-indigo);
+  }
+}
+
+.rubro {
+  padding: 8px 0;
+  border-top: 1px solid rgba(56, 50, 92, 0.2);
+
+  .rubro-fila {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    color: var(--app-indigo);
+  }
+
+  ion-progress-bar {
+    margin-top: 6px;
+    height: 8px;
+    border-radius: 4px;
+    --background: rgba(86, 77, 124, 0.2);
+  }
+
+  .tope {
+    display: block;
+    margin-top: 4px;
+    color: var(--app-indigo);
+  }
+}
+
+/* Alerta suave en Rosa Empolvado con texto Índigo Profundo */
+.auditoria ion-item {
+  --background: var(--app-rosa);
+  --color: var(--app-indigo);
+
+  ion-icon {
+    color: var(--app-indigo);
+  }
+
+  h3 {
+    font-weight: 700;
+    color: var(--app-indigo);
+  }
+
+  p {
+    color: var(--app-indigo);
+  }
+}
+
+.todo-ok {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 20px;
+  font-weight: 500;
+  color: var(--app-titulo-destacado);
+}
+
+.boton-miniatura {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 8px 0;
+  min-width: 52px;
+  min-height: 52px;
+  cursor: pointer;
+}
+
+.monto {
+  font-weight: 700;
+  color: var(--ion-text-color);
+}
+
+ion-label ion-button {
+  margin-top: 6px;
+}
+
+.pie-accion {
+  padding: 8px 16px;
+  background: var(--ion-background-color);
+  border-top: 1px solid var(--app-gris-lila);
+
+  ion-button {
+    --border-radius: 12px;
+    font-weight: 700;
+    min-height: 48px;
+  }
+}
+
+.vacio-anual {
+  padding-top: 48px;
+
+  h2 {
+    color: var(--app-titulo-destacado);
+    font-weight: 700;
+  }
+
+  p {
+    max-width: 320px;
+    margin: 8px auto 20px;
+    line-height: 1.4;
+  }
+}
+
+.sin-topes {
+  margin-top: 8px !important;
+  font-size: 0.85rem;
+}

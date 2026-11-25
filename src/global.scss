@@ -35,3 +35,57 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
+
+/* ===================== Estilos globales de la app ======================== */
+
+/* Áreas táctiles mínimas de 44x44 px (accesibilidad) */
+ion-button,
+ion-segment-button,
+ion-tab-button,
+ion-fab-button,
+ion-item-option {
+  min-height: 44px;
+}
+ion-button[size='small'] {
+  min-width: 44px;
+}
+
+/* Filas que crecen con el tamaño de letra del sistema */
+ion-item {
+  --min-height: 52px;
+}
+
+/* Títulos de las barras con buen peso */
+ion-toolbar ion-title {
+  font-weight: 600;
+}
+
+/* Hoja de la Guía Rápida y visor a pantalla completa */
+ion-modal.modal-visor {
+  --width: 100%;
+  --height: 100%;
+}
+
+/* Texto solo para lectores de pantalla */
+.solo-lector {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.estado-vacio {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--ion-text-color-step-300);
+
+  ion-icon {
+    font-size: 56px;
+    color: var(--app-gris-lila);
+  }
+}

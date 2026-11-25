@@ -1,0 +1,138 @@
+.zona-captura {
+  margin: 16px;
+  border: 2px dashed var(--app-zona-captura-borde);
+  background: var(--app-zona-captura-fondo);
+  box-shadow: none;
+  border-radius: 20px;
+
+  &.con-recibo {
+    border-style: solid;
+  }
+}
+
+.vacia {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 24px 16px;
+  color: var(--ion-text-color);
+
+  .icono-grande {
+    font-size: 56px;
+    color: var(--app-zona-captura-borde);
+  }
+
+  p {
+    margin: 12px 0 16px;
+    line-height: 1.4;
+  }
+
+  .acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+
+  .formatos {
+    margin-top: 12px;
+    font-size: 0.8rem;
+  }
+}
+
+.cargando {
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--app-zona-captura-borde);
+  font-weight: 600;
+}
+
+.previa {
+  position: relative;
+  min-height: 200px;
+
+  img {
+    display: block;
+    width: 100%;
+    max-height: 320px;
+    object-fit: contain;
+    background: var(--app-superficie-suave);
+  }
+
+  .pdf {
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--app-zona-captura-borde);
+
+    ion-icon {
+      font-size: 56px;
+    }
+  }
+
+  .leyendo {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: rgba(56, 50, 92, 0.75); /* Índigo Profundo */
+    color: #ffffff;
+    font-weight: 600;
+  }
+}
+
+.formulario app-campo-dinero {
+  padding-block: 4px;
+}
+
+.tarjeta-tributaria {
+  border: 1.5px solid var(--ion-color-primary);
+
+  ion-item {
+    --background: var(--app-zona-captura-fondo);
+  }
+
+  ion-toggle {
+    font-weight: 600;
+  }
+}
+
+.aviso-soporte {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  padding: 8px 16px 12px;
+  background: var(--app-rosa);
+  color: var(--app-indigo);
+  font-weight: 500;
+  line-height: 1.4;
+
+  ion-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+}
+
+.pie-accion {
+  padding: 8px 16px;
+  background: var(--ion-background-color);
+  border-top: 1px solid var(--app-gris-lila);
+
+  ion-button {
+    --border-radius: 12px;
+    font-weight: 700;
+    min-height: 48px;
+  }
+}

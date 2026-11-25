@@ -1,0 +1,19 @@
+.nota {
+  margin: 8px 0 0;
+  padding: 0 20px; /* alineado con las listas inset */
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--ion-text-color-step-300);
+}
+
+.pie-accion {
+  padding: 8px 16px calc(8px + var(--ion-safe-area-bottom, 0px));
+  background: var(--ion-background-color);
+  border-top: 1px solid var(--app-gris-lila);
+
+  ion-button {
+    --border-radius: 12px;
+    font-weight: 700;
+    min-height: 48px;
+  }
+}

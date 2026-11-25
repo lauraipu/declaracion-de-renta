@@ -1,0 +1,80 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="cerrar()" aria-label="Cerrar sin guardar">
+        <ion-icon slot="icon-only" name="close-outline" aria-hidden="true"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Presupuesto</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list inset="true">
+    <ion-item>
+      <app-campo-dinero
+        label="Tope mensual (COP)"
+        placeholder="2.500.000"
+        ayuda="Lo máximo que quieres gastar cada mes."
+        [(valor)]="presupuesto"
+      ></app-campo-dinero>
+    </ion-item>
+    <ion-item>
+      <ion-select label="Año fiscal activo" labelPlacement="stacked" interface="action-sheet" cancelText="Cancelar" [(ngModel)]="anioFiscal">
+        @for (a of anios; track a) {
+          <ion-select-option [value]="a">{{ a }}</ion-select-option>
+        }
+      </ion-select>
+    </ion-item>
+    <ion-item>
+      <ion-input
+        label="Correo del contador (opcional)"
+        labelPlacement="stacked"
+        type="email"
+        inputmode="email"
+        autocomplete="email"
+        maxlength="120"
+        placeholder="contador@ejemplo.com"
+        [(ngModel)]="correo"
+        errorText="Escribe un correo válido, por ejemplo nombre@dominio.com"
+        [class.ion-touched]="intentoGuardar || (correo.length > 0 && !correoValido)"
+        [class.ion-invalid]="!correoValido"
+      ></ion-input>
+    </ion-item>
+  </ion-list>
+
+  <ion-accordion-group>
+    <ion-accordion value="topes">
+      <ion-item slot="header">
+        <ion-label class="ion-text-wrap">
+          <h3>Topes anuales por rubro (opcional)</h3>
+          <p>Valores por año gravable, en COP</p>
+        </ion-label>
+      </ion-item>
+      <div slot="content">
+        <p class="nota">
+          Si tu contador te dio un tope <strong>anual</strong> para algún rubro, escríbelo aquí y verás cuánto llevas
+          en "Renta Anual".
+        </p>
+        <ion-list inset="true">
+          @for (t of tipos; track t.valor) {
+            <ion-item>
+              <app-campo-dinero
+                [label]="t.etiqueta"
+                placeholder="Sin tope"
+                [valor]="topes[t.valor] ?? null"
+                (valorChange)="topes[t.valor] = $event"
+              ></app-campo-dinero>
+            </ion-item>
+          }
+        </ion-list>
+      </div>
+    </ion-accordion>
+  </ion-accordion-group>
+</ion-content>
+
+<ion-footer class="ion-no-border">
+  <div class="pie-accion">
+    <ion-button color="primary" expand="block" (click)="guardar()">Guardar</ion-button>
+  </div>
+</ion-footer>

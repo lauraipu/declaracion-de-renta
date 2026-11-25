@@ -1,0 +1,68 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="cerrar()" aria-label="Cerrar visor">
+        <ion-icon slot="icon-only" name="close-outline" aria-hidden="true"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ gasto.comercio || 'Recibo' }}</ion-title>
+    @if (!soloLectura && gasto.fotoNombreArchivo) {
+      <ion-buttons slot="end">
+        <ion-button (click)="compartir()" aria-label="Compartir esta imagen del recibo">
+          <ion-icon slot="icon-only" name="share-social-outline" aria-hidden="true"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    }
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [scrollY]="false" class="visor">
+  @if (cargando()) {
+    <div class="centro"><ion-spinner name="crescent" aria-label="Cargando recibo"></ion-spinner></div>
+  } @else if (url()) {
+    <div
+      class="lienzo"
+      (touchstart)="alTocar($event)"
+      (touchmove)="alMover($event)"
+      (touchend)="alSoltar()"
+      role="img"
+      [attr.aria-label]="'Foto del recibo de ' + gasto.comercio + '. Pellizca para hacer zoom.'"
+    >
+      <img
+        [src]="url()"
+        alt=""
+        [style.transform]="'scale(' + escala() + ') translate(' + despl().x + 'px, ' + despl().y + 'px)'"
+      />
+    </div>
+  } @else {
+    <div class="centro estado-vacio">
+      <ion-icon [name]="esPdf ? 'document-outline' : 'image-outline'" aria-hidden="true"></ion-icon>
+      <p>
+        @if (esPdf) {
+          Este soporte es un PDF. Usa "Compartir" para abrirlo en otra app.
+        } @else {
+          Este gasto no tiene foto del recibo.
+        }
+      </p>
+    </div>
+  }
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar class="pie">
+    <div class="datos">
+      <strong>{{ gasto.monto | moneda }}</strong>
+      <span>{{ fechaCorta(gasto.fecha) }}</span>
+    </div>
+    @if (url()) {
+      <ion-buttons slot="end">
+        <ion-button (click)="alejar()" [disabled]="escala() <= 1" aria-label="Alejar">
+          <ion-icon slot="icon-only" name="remove-circle-outline" aria-hidden="true"></ion-icon>
+        </ion-button>
+        <ion-button (click)="acercar()" [disabled]="escala() >= 5" aria-label="Acercar">
+          <ion-icon slot="icon-only" name="add-circle-outline" aria-hidden="true"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    }
+  </ion-toolbar>
+</ion-footer>

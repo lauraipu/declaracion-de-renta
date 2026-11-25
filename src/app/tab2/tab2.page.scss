@@ -1,0 +1,172 @@
+.selector-mes {
+  --background: var(--ion-color-primary-shade);
+}
+
+.resumen {
+  margin: 16px;
+  border-radius: 20px;
+  background: var(--app-tarjeta-resumen);
+  color: #ffffff;
+
+  ion-card-content {
+    padding: 20px;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  .etiqueta {
+    font-size: 0.85rem;
+    color: var(--app-azul-lavanda);
+  }
+
+  .disponible {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 12px;
+    word-break: break-word;
+
+    &.negativo {
+      color: var(--app-rosa);
+    }
+  }
+
+  .fila {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+
+    .derecha {
+      text-align: end;
+    }
+  }
+
+  .valor {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #ffffff;
+  }
+
+  ion-progress-bar {
+    height: 10px;
+    border-radius: 6px;
+    --background: rgba(189, 195, 225, 0.25);
+  }
+
+  .estado {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    color: var(--app-azul-lavanda);
+    font-weight: 500;
+
+    ion-icon {
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+  }
+
+  ion-button {
+    margin-top: 12px;
+  }
+}
+
+.aviso-error {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin: 12px 16px 0;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--app-rosa);
+  color: var(--app-indigo);
+  font-weight: 500;
+
+  ion-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+}
+
+/*
+ * Filtros rápidos.
+ * La línea que se quedaba bajo "TODOS" era el indicador interno de ion-segment-button
+ * (::part(indicator)), no un border-bottom propio: al tocar otro filtro, la animación del
+ * indicador y el desplazamiento horizontal del segmento coincidían y el indicador anterior
+ * no se ocultaba. Aquí se fuerza que SOLO el botón activo pinte su línea.
+ */
+.contenedor-filtros {
+  position: relative;
+
+  /* Degradado a la derecha: deja claro que la barra se desliza (evita el corte "TRAN…") */
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 32px;
+    pointer-events: none;
+    background: linear-gradient(to right, rgba(var(--ion-background-color-rgb), 0), var(--ion-background-color));
+  }
+}
+
+.filtros {
+  padding: 0 32px 0 12px;
+  border-bottom: 1px solid var(--app-gris-lila);
+
+  ion-segment-button {
+    min-width: auto;
+    --padding-start: 14px;
+    --padding-end: 14px;
+    --indicator-transition: none;
+
+    &::part(indicator-background) {
+      background: transparent;
+    }
+
+    &.segment-button-checked::part(indicator-background) {
+      background: var(--ion-color-primary);
+    }
+  }
+}
+
+.movimientos {
+  margin-top: 8px;
+
+  h2 {
+    font-weight: 600;
+  }
+
+  ion-badge {
+    margin-top: 4px;
+  }
+
+  .monto {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--ion-text-color);
+  }
+}
+
+.boton-miniatura {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 8px 0;
+  min-width: 52px;
+  min-height: 52px;
+  cursor: pointer;
+}
+
+.pista {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--ion-text-color-step-400);
+  padding: 0 16px 24px;
+}

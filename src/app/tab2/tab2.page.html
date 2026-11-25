@@ -1,15 +1,144 @@
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar>
-    <ion-title> Tab 2 </ion-title>
+    <ion-title>Mes Actual</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="abrirConfiguracion()" aria-label="Editar tope de presupuesto mensual">
+        <ion-icon slot="icon-only" name="settings-outline" aria-hidden="true"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar class="selector-mes">
+    <ion-buttons slot="start">
+      <ion-button (click)="mesAnterior()" aria-label="Mes anterior">
+        <ion-icon slot="icon-only" name="chevron-back-outline" aria-hidden="true"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="ion-text-center" aria-live="polite">{{ titulo() }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="mesSiguiente()" [disabled]="esMesActual()" aria-label="Mes siguiente">
+        <ion-icon slot="icon-only" name="chevron-forward-outline" aria-hidden="true"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 2</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content>
+  @if (errorCarga()) {
+    <p class="aviso-error" role="alert">
+      <ion-icon name="warning-outline" aria-hidden="true"></ion-icon>
+      <span>Algunos datos guardados estaban dañados y no se pudieron mostrar. Se guardó una copia de respaldo.</span>
+    </p>
+  }
 
-  <app-explore-container name="Tab 2 page"></app-explore-container>
+  <!-- Container 1: Resumen financiero -->
+  <ion-card class="resumen">
+    <ion-card-content>
+      @if (presupuesto() > 0) {
+        <p class="etiqueta">Disponible</p>
+        <p class="disponible" [class.negativo]="disponible() < 0">{{ disponible() | moneda: config().moneda }}</p>
+        <div class="fila">
+          <div>
+            <p class="etiqueta">Gastado</p>
+            <p class="valor">{{ gastado() | moneda: config().moneda }}</p>
+          </div>
+          <div class="derecha">
+            <p class="etiqueta">Presupuesto</p>
+            <p class="valor">{{ presupuesto() | moneda: config().moneda }}</p>
+          </div>
+        </div>
+        <ion-progress-bar
+          [value]="progreso()"
+          [color]="estado().color"
+          [attr.aria-label]="estado().texto"
+        ></ion-progress-bar>
+        <p class="estado">
+          <ion-icon [name]="estado().icono" aria-hidden="true"></ion-icon>
+          <span>{{ estado().texto }}</span>
+        </p>
+      } @else {
+        <p class="etiqueta">Gastado este mes</p>
+        <p class="disponible">{{ gastado() | moneda: config().moneda }}</p>
+        <p class="estado">Define un tope mensual para ver cuánto te queda disponible.</p>
+        <ion-button color="azul-lavanda" (click)="abrirConfiguracion()">
+          <ion-icon slot="start" name="wallet-outline" aria-hidden="true"></ion-icon>
+          Configurar presupuesto
+        </ion-button>
+      }
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Container 2: Filtros rápidos -->
+  <div class="contenedor-filtros">
+  <ion-segment
+    [scrollable]="true"
+    [value]="filtro()"
+    (ionChange)="cambiarFiltro($event.detail.value)"
+    aria-label="Filtrar movimientos"
+    class="filtros"
+  >
+    @for (f of filtros; track f.valor) {
+      <ion-segment-button [value]="f.valor">
+        <ion-label>{{ f.etiqueta }}</ion-label>
+      </ion-segment-button>
+    }
+  </ion-segment>
+  </div>
+
+  <!-- Container 3: Lista de movimientos -->
+  @if (visibles().length) {
+    <ion-list class="movimientos">
+      @for (g of visibles(); track g.id) {
+        <ion-item-sliding #fila>
+          <ion-item>
+            <button
+              slot="start"
+              class="boton-miniatura"
+              (click)="verRecibo(g)"
+              [attr.aria-label]="'Ver recibo de ' + g.comercio"
+            >
+              <app-miniatura-recibo [gasto]="g"></app-miniatura-recibo>
+            </button>
+            <ion-label class="ion-text-wrap">
+              <h2>{{ g.titulo || g.comercio }}</h2>
+              <p>
+                @if (g.titulo) {
+                  {{ g.comercio }} ·
+                }
+                {{ fechaCorta(g.fecha) }} · {{ etiquetaCategoria(g.categoria) }}
+              </p>
+              @if (g.esDeducibleRenta) {
+                <ion-badge color="lavanda">Renta</ion-badge>
+              }
+            </ion-label>
+            <ion-note slot="end" class="monto">{{ g.monto | moneda: config().moneda }}</ion-note>
+          </ion-item>
+          <ion-item-options side="end">
+            <ion-item-option color="secondary" (click)="editar(g, fila)" aria-label="Editar gasto">
+              <ion-icon slot="top" name="create-outline" aria-hidden="true"></ion-icon>
+              Editar
+            </ion-item-option>
+            <ion-item-option color="danger" (click)="eliminar(g, fila)" aria-label="Eliminar gasto">
+              <ion-icon slot="top" name="trash-outline" aria-hidden="true"></ion-icon>
+              Eliminar
+            </ion-item-option>
+          </ion-item-options>
+        </ion-item-sliding>
+      }
+    </ion-list>
+    <p class="pista">Desliza un gasto hacia la izquierda para editarlo o eliminarlo.</p>
+  } @else {
+    <div class="estado-vacio">
+      <ion-icon name="wallet-outline" aria-hidden="true"></ion-icon>
+      @if (gastosMes().length) {
+        <p>No hay gastos con este filtro.</p>
+        <ion-button fill="outline" (click)="cambiarFiltro('todos')">Ver todos</ion-button>
+      } @else {
+        <p>Aún no hay gastos en {{ titulo() }}.</p>
+        <ion-button (click)="irARegistrar()">
+          <ion-icon slot="start" name="add-circle-outline" aria-hidden="true"></ion-icon>
+          Registrar gasto
+        </ion-button>
+      }
+    </div>
+  }
 </ion-content>
